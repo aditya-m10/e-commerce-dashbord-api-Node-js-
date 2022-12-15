@@ -4,6 +4,8 @@ require("./database/config") ;
 const User = require("./database/User")
 const Product= require("./database/Product");
 const { request } = require("express");
+const Jwt = require('jsonwebtoken');
+const jwtKey= "e-comm" //process.env.JWT_KEY
 const app=express();
 app.use(express.json())
 app.use(cors({ origin: true })); // enable origin cors
@@ -13,13 +15,30 @@ app.post("/register",async (req,resp)=>{
     let result=await user.save()
     result=result.toObject();
     delete result.password
-    resp.send(result)
-})
+    if(result){
+        
+        Jwt.sign({result},jwtKey,{expiresIn: "2h"},(err,token)=>{
+            if(err){
+                resp.send({result:"something went wrong , try after sometime"})
+            }
+            resp.send({result,auth: token})
+        })
+    }
+    })
 app.post("/login",async (req,resp)=>{
     if (req.body.email && req.body.password){
+        console.log("hi")
+
     let user=await User.findOne(req.body).select("-password");
+    console.log("hi")
     if(user){
-        resp.send(user)
+        
+        Jwt.sign({user},jwtKey,{expiresIn: "2h"},(err,token)=>{
+            if(err){
+                resp.send({result:"something went wrong , try after sometime"})
+            }
+            resp.send({user,auth: token})
+        })
     }
     else{
         resp.send({error:"No User Found"})
@@ -49,7 +68,6 @@ app.get("/products",async (req,resp)=>{
     }
 })
 app.delete("/product/:id",async (req,resp)=>{
-    console.log(req.body)
     let product=await Product.deleteOne({_id: req.body.id})
     resp.send({msg:"deleted"})
 })
@@ -64,7 +82,6 @@ app.get("/product/:id",async (req,resp)=>{
     }
 })
 app.put("/update/:id",async (req,resp)=>{
-    console.log(req.body)
     let result=await Product.updateOne({_id:req.params.id},{$set:req.body})
     resp.send(result)
 })

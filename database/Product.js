@@ -3,7 +3,7 @@ const productSchema=new mongoose.Schema({
     name:String,
     price:Number,
     category:String,
-    userid:String,
+    user:String,
     company:String,
 });
 
