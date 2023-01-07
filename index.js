@@ -1,11 +1,13 @@
 const express = require("express");
 const cors = require("cors");
 require("./database/config");
+require('dotenv').config();
+
 const User = require("./database/User");
 const Product = require("./database/Product");
 const { request } = require("express");
 const Jwt = require("jsonwebtoken");
-const jwtKey = "e-comm"; //process.env.JWT_KEY
+const jwtKey = process.env.JWT_KEY; 
 const app = express();
 app.use(express.json());
 app.use(cors({ origin: true })); // enable origin cors
