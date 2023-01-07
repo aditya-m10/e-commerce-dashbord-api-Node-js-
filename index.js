@@ -30,6 +30,9 @@ const tokenVerification=(req,resp,next)=>{
     }
 }
 app.post("/register", async (req, resp) => {
+  if (req.body.email) {
+  let user = await User.findOne( { "email": req.body.email },).select("-password");
+if(!user){
   let user = new User(req.body);
   let result = await user.save();
   result = result.toObject();
@@ -42,6 +45,12 @@ app.post("/register", async (req, resp) => {
       resp.send({ result, auth: token });
     });
   }
+}
+if(user){
+  resp.send({error :"Email already exist"})
+}
+
+}
 });
 app.post("/login", async (req, resp) => {
   if (req.body.email && req.body.password) {
@@ -83,6 +92,7 @@ app.get("/products",tokenVerification, async (req, resp) => {
   }
 });
 app.delete("/product/:id",tokenVerification, async (req, resp) => {
+  console.log(req.body)
   let product = await Product.deleteOne({ _id: req.body.id });
   resp.send({ msg: "deleted" });
 });
